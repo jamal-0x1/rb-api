@@ -102,29 +102,52 @@ async function main() {
     },
   });
 
-  // ---- Categories (tree) ----
+  // ---- Categories (top-level for homepage) ----
   console.log('seeding categories...');
-  const electronics = await prisma.category.create({
-    data: { name: 'Electronics', slug: 'electronics', sortOrder: 1 },
-  });
-  const [computers, phones, wearables, peripherals, networking] =
-    await Promise.all([
-      prisma.category.create({
-        data: { name: 'Computers', slug: 'computers', parentId: electronics.id, sortOrder: 1 },
-      }),
-      prisma.category.create({
-        data: { name: 'Phones', slug: 'phones', parentId: electronics.id, sortOrder: 2 },
-      }),
-      prisma.category.create({
-        data: { name: 'Wearables', slug: 'wearables', parentId: electronics.id, sortOrder: 3 },
-      }),
-      prisma.category.create({
-        data: { name: 'Peripherals', slug: 'peripherals', parentId: electronics.id, sortOrder: 4 },
-      }),
-      prisma.category.create({
-        data: { name: 'Networking', slug: 'networking', parentId: electronics.id, sortOrder: 5 },
-      }),
-    ]);
+  const CATEGORY_IMAGES_SRC = path.resolve(
+    __dirname,
+    '../../rb-ui/public/images/categories',
+  );
+  const CATEGORY_STORAGE_ROOT = path.resolve(process.cwd(), 'storage/categories');
+  fs.mkdirSync(CATEGORY_STORAGE_ROOT, { recursive: true });
+
+  type SeedCategory = { name: string; slug: string; iconFile: string; sortOrder: number };
+  const seedCategories: SeedCategory[] = [
+    { name: 'Televisions', slug: 'televisions', iconFile: 'categories-01.png', sortOrder: 1 },
+    { name: 'Laptop & PC', slug: 'laptop-pc', iconFile: 'categories-02.png', sortOrder: 2 },
+    { name: 'Mobile & Tablets', slug: 'mobile-tablets', iconFile: 'categories-03.png', sortOrder: 3 },
+    { name: 'Games & Videos', slug: 'games-videos', iconFile: 'categories-04.png', sortOrder: 4 },
+    { name: 'Home Appliances', slug: 'home-appliances', iconFile: 'categories-05.png', sortOrder: 5 },
+    { name: 'Health & Sports', slug: 'health-sports', iconFile: 'categories-06.png', sortOrder: 6 },
+    { name: 'Watches', slug: 'watches', iconFile: 'categories-07.png', sortOrder: 7 },
+  ];
+
+  const categoriesBySlug: Record<string, { id: string }> = {};
+  for (const sc of seedCategories) {
+    const created = await prisma.category.create({
+      data: { name: sc.name, slug: sc.slug, sortOrder: sc.sortOrder },
+    });
+    const src = path.join(CATEGORY_IMAGES_SRC, sc.iconFile);
+    if (fs.existsSync(src)) {
+      const destDir = path.join(CATEGORY_STORAGE_ROOT, created.id);
+      fs.mkdirSync(destDir, { recursive: true });
+      fs.copyFileSync(src, path.join(destDir, sc.iconFile));
+      await prisma.category.update({
+        where: { id: created.id },
+        data: { imageUrl: `/storage/categories/${created.id}/${sc.iconFile}` },
+      });
+    }
+    categoriesBySlug[sc.slug] = { id: created.id };
+  }
+
+  // Aliases for product mapping
+  const computers = categoriesBySlug['laptop-pc'];
+  const phones = categoriesBySlug['mobile-tablets'];
+  const wearables = categoriesBySlug['watches'];
+  const peripherals = categoriesBySlug['laptop-pc'];
+  const networking = categoriesBySlug['laptop-pc'];
+  const games = categoriesBySlug['games-videos'];
+  void networking; void wearables; void peripherals;
 
   // ---- Tags ----
   console.log('seeding tags...');
@@ -160,7 +183,7 @@ async function main() {
       slug: 'havit-hv-g69-usb-gamepad',
       description: 'Wired USB gamepad with vibration feedback.',
       basePrice: '3290',
-      categoryId: peripherals.id,
+      categoryId: games.id,
       tagIds: [tagSale.id],
       variants: [{ sku: 'GP-HV-G69-BLK', color: 'Black' }],
     },
@@ -197,7 +220,7 @@ async function main() {
       description: 'Apple MacBook Air with M1 chip, 8GB unified memory, 256GB SSD.',
       basePrice: '109900',
       categoryId: computers.id,
-      tagIds: [tagNew.id],
+      tagIds: [tagNew.id, tagFeatured.id],
       variants: [
         { sku: 'AP-MBA-M1-256-SG', color: 'Space Gray' },
         { sku: 'AP-MBA-M1-256-SLV', color: 'Silver' },
@@ -210,8 +233,8 @@ async function main() {
       slug: 'apple-watch-ultra',
       description: 'Rugged titanium Apple Watch built for adventure.',
       basePrice: '89900',
-      categoryId: wearables.id,
-      tagIds: [tagNew.id],
+      categoryId: categoriesBySlug['watches'].id,
+      tagIds: [tagNew.id, tagFeatured.id],
       variants: [{ sku: 'AP-AW-ULTRA-49', size: '49mm', color: 'Titanium' }],
     },
     {
@@ -235,8 +258,8 @@ async function main() {
       slug: 'apple-ipad-air-5-64gb',
       description: 'Apple iPad Air with M1 chip, 10.9-inch Liquid Retina display.',
       basePrice: '64900',
-      categoryId: computers.id,
-      tagIds: [tagNew.id],
+      categoryId: phones.id,
+      tagIds: [tagNew.id, tagFeatured.id],
       variants: [
         { sku: 'AP-IPAD-AIR5-64-BLU', color: 'Blue' },
         { sku: 'AP-IPAD-AIR5-64-SG', color: 'Space Gray' },

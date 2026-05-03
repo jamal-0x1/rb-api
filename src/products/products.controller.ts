@@ -6,8 +6,9 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
 
 @ApiTags('products')
@@ -17,8 +18,25 @@ export class ProductsController {
 
   @Get()
   @ApiOperation({ summary: 'List' })
-  findAll() {
-    return this.service.findAll();
+  @ApiQuery({ name: 'tag', required: false })
+  @ApiQuery({ name: 'categoryId', required: false })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  findAll(
+    @Query('tag') tag?: string,
+    @Query('categoryId') categoryId?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.service.findAll({
+      tag,
+      categoryId,
+      limit: limit ? Number(limit) : undefined,
+    });
+  }
+
+  @Get('slug/:slug')
+  @ApiOperation({ summary: 'Get by slug' })
+  findBySlug(@Param('slug') slug: string) {
+    return this.service.findBySlug(slug);
   }
 
   @Get(':id')

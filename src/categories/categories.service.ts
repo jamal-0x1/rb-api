@@ -6,8 +6,11 @@ import { PrismaService } from '../prisma/prisma.service';
 export class CategoriesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
-    return this.prisma.category.findMany();
+  findAll(opts: { topLevel?: boolean } = {}) {
+    return this.prisma.category.findMany({
+      where: opts.topLevel ? { parentId: null } : undefined,
+      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+    });
   }
 
   findOne(id: string) {

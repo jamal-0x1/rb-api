@@ -6,8 +6,9 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CategoriesService } from './categories.service';
 
 @ApiTags('categories')
@@ -17,8 +18,9 @@ export class CategoriesController {
 
   @Get()
   @ApiOperation({ summary: 'List' })
-  findAll() {
-    return this.service.findAll();
+  @ApiQuery({ name: 'topLevel', required: false, type: Boolean })
+  findAll(@Query('topLevel') topLevel?: string) {
+    return this.service.findAll({ topLevel: topLevel === 'true' });
   }
 
   @Get(':id')
