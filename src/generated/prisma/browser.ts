@@ -88,11 +88,6 @@ export type Order = Prisma.OrderModel
  */
 export type OrderItem = Prisma.OrderItemModel
 /**
- * Model PaymentMethod
- * 
- */
-export type PaymentMethod = Prisma.PaymentMethodModel
-/**
  * Model Payment
  * 
  */

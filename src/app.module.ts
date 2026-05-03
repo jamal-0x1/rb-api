@@ -17,7 +17,6 @@ import { CartItemsModule } from './cart-items/cart-items.module';
 import { CouponsModule } from './coupons/coupons.module';
 import { OrdersModule } from './orders/orders.module';
 import { OrderItemsModule } from './order-items/order-items.module';
-import { PaymentMethodsModule } from './payment-methods/payment-methods.module';
 import { PaymentsModule } from './payments/payments.module';
 import { ShipmentsModule } from './shipments/shipments.module';
 import { ShipmentItemsModule } from './shipment-items/shipment-items.module';
@@ -46,7 +45,6 @@ import { WishlistItemsModule } from './wishlist-items/wishlist-items.module';
     CouponsModule,
     OrdersModule,
     OrderItemsModule,
-    PaymentMethodsModule,
     PaymentsModule,
     ShipmentsModule,
     ShipmentItemsModule,
