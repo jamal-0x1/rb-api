@@ -235,7 +235,11 @@ async function main() {
       basePrice: '89900',
       categoryId: categoriesBySlug['watches'].id,
       tagIds: [tagNew.id, tagFeatured.id],
-      variants: [{ sku: 'AP-AW-ULTRA-49', size: '49mm', color: 'Titanium' }],
+      variants: [
+        { sku: 'AP-AW-ULTRA-41', size: '41mm', color: 'Titanium' },
+        { sku: 'AP-AW-ULTRA-45', size: '45mm', color: 'Titanium' },
+        { sku: 'AP-AW-ULTRA-49', size: '49mm', color: 'Titanium' },
+      ],
     },
     {
       sourceId: 6,
