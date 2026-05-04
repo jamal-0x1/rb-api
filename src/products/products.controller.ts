@@ -40,6 +40,7 @@ export class ProductsController {
 
   @Get()
   @ApiOperation({ summary: 'List' })
+  @ApiQuery({ name: 'q', required: false, description: 'Search by name/sku/description' })
   @ApiQuery({ name: 'tag', required: false })
   @ApiQuery({ name: 'tags', required: false, description: 'CSV' })
   @ApiQuery({ name: 'categoryId', required: false })
@@ -52,6 +53,7 @@ export class ProductsController {
   @ApiQuery({ name: 'sort', required: false })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   findAll(
+    @Query('q') q?: string,
     @Query('tag') tag?: string,
     @Query('tags') tags?: string,
     @Query('categoryId') categoryId?: string,
@@ -65,6 +67,7 @@ export class ProductsController {
     @Query('limit') limit?: string,
   ) {
     return this.service.findAll({
+      q,
       tag,
       tags: splitCsv(tags),
       categoryId,

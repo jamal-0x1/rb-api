@@ -5,6 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export type SortKey = 'latest' | 'oldest' | 'price-asc' | 'price-desc';
 
 export type ProductFilter = {
+  q?: string;
   tag?: string;
   tags?: string[];
   categoryId?: string;
@@ -24,6 +25,15 @@ export class ProductsService {
 
   private buildWhere(opts: ProductFilter): Prisma.ProductWhereInput {
     const where: Prisma.ProductWhereInput = { active: true };
+
+    if (opts.q && opts.q.trim()) {
+      const q = opts.q.trim();
+      where.OR = [
+        { name: { contains: q, mode: 'insensitive' } },
+        { sku: { contains: q, mode: 'insensitive' } },
+        { description: { contains: q, mode: 'insensitive' } },
+      ];
+    }
 
     const catIds = [
       ...(opts.categoryId ? [opts.categoryId] : []),
