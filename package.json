@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build",
+    "build": "node -e \"const fs=require('fs');for(const p of ['dist','tsconfig.build.tsbuildinfo'])fs.rmSync(p,{recursive:true,force:true})\" && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",

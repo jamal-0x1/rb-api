@@ -6,6 +6,8 @@ node_modules
 /generated/prisma
 dist/
 *.zip
+*.tsbuildinfo
+.DS_Store
 
 # Uploaded files
 /storage/*
