@@ -10,3 +10,7 @@ dist/
 # Uploaded files
 /storage/*
 !/storage/.gitkeep
+
+# DB dumps
+*.sql
+!prisma/migrations/**/*.sql
