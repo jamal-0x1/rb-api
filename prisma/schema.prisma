@@ -76,7 +76,10 @@ model Product {
   sku         String   @unique
   name        String
   slug        String   @unique
-  description String?
+  description     String?
+  specifications  String? @db.Text
+  careInstructions String? @db.Text @map("care_instructions")
+  attributes      Json?
   basePrice   Decimal  @map("base_price") @db.Decimal(10, 2)
   currency    String   @default("BDT")
   active      Boolean  @default(true)
