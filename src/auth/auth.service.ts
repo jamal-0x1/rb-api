@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   UnauthorizedException,
@@ -8,6 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 const SALT_ROUNDS = 10;
 
@@ -52,6 +54,54 @@ export class AuthService {
   me(userId: string) {
     return this.prisma.user.findUnique({
       where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        emailVerified: true,
+        createdAt: true,
+      },
+    });
+  }
+
+  async updateProfile(userId: string, dto: UpdateProfileDto) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new UnauthorizedException();
+
+    const data: {
+      email?: string;
+      firstName?: string | null;
+      lastName?: string | null;
+      passwordHash?: string;
+    } = {};
+
+    if (dto.email && dto.email !== user.email) {
+      const taken = await this.prisma.user.findUnique({
+        where: { email: dto.email },
+      });
+      if (taken) throw new ConflictException('Email already in use');
+      data.email = dto.email;
+    }
+    if (dto.firstName !== undefined) data.firstName = dto.firstName;
+    if (dto.lastName !== undefined) data.lastName = dto.lastName;
+
+    if (dto.password) {
+      if (!dto.currentPassword) {
+        throw new BadRequestException('currentPassword required to change password');
+      }
+      if (!user.passwordHash) {
+        throw new BadRequestException('Account has no password set');
+      }
+      const ok = await bcrypt.compare(dto.currentPassword, user.passwordHash);
+      if (!ok) throw new UnauthorizedException('Current password incorrect');
+      data.passwordHash = await bcrypt.hash(dto.password, SALT_ROUNDS);
+    }
+
+    return this.prisma.user.update({
+      where: { id: userId },
+      data,
       select: {
         id: true,
         email: true,
