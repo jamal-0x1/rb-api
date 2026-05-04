@@ -9,6 +9,8 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { InventoryService } from './inventory.service';
+import { CreateInventoryDto } from './dto/create-inventory.dto';
+import { UpdateInventoryDto } from './dto/update-inventory.dto';
 
 @ApiTags('inventory')
 @Controller('inventory')
@@ -29,14 +31,14 @@ export class InventoryController {
 
   @Post()
   @ApiOperation({ summary: 'Create' })
-  create(@Body() body: any) {
-    return this.service.create(body);
+  create(@Body() dto: CreateInventoryDto) {
+    return this.service.create(dto);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update' })
-  update(@Param('id') id: string, @Body() body: any) {
-    return this.service.update(id, body);
+  update(@Param('id') id: string, @Body() dto: UpdateInventoryDto) {
+    return this.service.update(id, dto);
   }
 
   @Delete(':id')

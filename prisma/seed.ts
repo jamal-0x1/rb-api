@@ -201,7 +201,7 @@ async function main() {
       tagIds: [tagFeatured.id, tagNew.id],
       variants: [
         { sku: 'IP-14P-128-MID', color: 'Midnight' },
-        { sku: 'IP-14P-128-PUR', color: 'Purple' },
+        { sku: 'IP-14P-128-PUR', color: 'Purple', priceOverride: '101900' },
       ],
     },
     {
@@ -226,7 +226,7 @@ async function main() {
       tagIds: [tagNew.id, tagFeatured.id],
       variants: [
         { sku: 'AP-MBA-M1-256-SG', color: 'Space Gray' },
-        { sku: 'AP-MBA-M1-256-SLV', color: 'Silver' },
+        { sku: 'AP-MBA-M1-256-SLV', color: 'Silver', priceOverride: '112900' },
       ],
     },
     {
@@ -240,8 +240,8 @@ async function main() {
       tagIds: [tagNew.id, tagFeatured.id],
       variants: [
         { sku: 'AP-AW-ULTRA-41', size: '41mm', color: 'Titanium' },
-        { sku: 'AP-AW-ULTRA-45', size: '45mm', color: 'Titanium' },
-        { sku: 'AP-AW-ULTRA-49', size: '49mm', color: 'Titanium' },
+        { sku: 'AP-AW-ULTRA-45', size: '45mm', color: 'Titanium', priceOverride: '92900' },
+        { sku: 'AP-AW-ULTRA-49', size: '49mm', color: 'Titanium', priceOverride: '96900' },
       ],
     },
     {
@@ -255,7 +255,7 @@ async function main() {
       tagIds: [tagSale.id, tagFeatured.id],
       variants: [
         { sku: 'LG-MX3-GRP', color: 'Graphite' },
-        { sku: 'LG-MX3-PG', color: 'Pale Gray' },
+        { sku: 'LG-MX3-PG', color: 'Pale Gray', priceOverride: '12900' },
       ],
     },
     {
@@ -268,7 +268,7 @@ async function main() {
       categoryId: phones.id,
       tagIds: [tagNew.id, tagFeatured.id],
       variants: [
-        { sku: 'AP-IPAD-AIR5-64-BLU', color: 'Blue' },
+        { sku: 'AP-IPAD-AIR5-64-BLU', color: 'Blue', priceOverride: '67900' },
         { sku: 'AP-IPAD-AIR5-64-SG', color: 'Space Gray' },
       ],
     },
@@ -366,7 +366,7 @@ async function main() {
       tagIds: [tagNew.id, tagSale.id],
       variants: [
         { sku: 'XM-MB-8-BLK', color: 'Graphite' },
-        { sku: 'XM-MB-8-GLD', color: 'Champagne Gold' },
+        { sku: 'XM-MB-8-GLD', color: 'Champagne Gold', priceOverride: '5490' },
       ],
     },
     {
@@ -380,7 +380,7 @@ async function main() {
       tagIds: [tagSale.id],
       variants: [
         { sku: 'YM-PRO-6MM-BLU', color: 'Blue' },
-        { sku: 'YM-PRO-6MM-PUR', color: 'Purple' },
+        { sku: 'YM-PRO-6MM-PUR', color: 'Purple', priceOverride: '2790' },
       ],
     },
     {

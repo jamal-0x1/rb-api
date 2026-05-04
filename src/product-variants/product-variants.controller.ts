@@ -6,9 +6,13 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ProductVariantsService } from './product-variants.service';
+import { CreateProductVariantDto } from './dto/create-product-variant.dto';
+import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
+import { BulkCreateVariantsDto } from './dto/bulk-create-variants.dto';
 
 @ApiTags('product-variants')
 @Controller('product-variants')
@@ -17,8 +21,9 @@ export class ProductVariantsController {
 
   @Get()
   @ApiOperation({ summary: 'List' })
-  findAll() {
-    return this.service.findAll();
+  @ApiQuery({ name: 'productId', required: false })
+  findAll(@Query('productId') productId?: string) {
+    return this.service.findAll(productId);
   }
 
   @Get(':id')
@@ -29,14 +34,25 @@ export class ProductVariantsController {
 
   @Post()
   @ApiOperation({ summary: 'Create' })
-  create(@Body() body: any) {
-    return this.service.create(body);
+  create(@Body() dto: CreateProductVariantDto) {
+    return this.service.create(dto);
+  }
+
+  @Post('bulk/:productId')
+  @ApiOperation({
+    summary: 'Bulk create variants for a product (atomic)',
+  })
+  bulkCreate(
+    @Param('productId') productId: string,
+    @Body() dto: BulkCreateVariantsDto,
+  ) {
+    return this.service.bulkCreate(productId, dto);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update' })
-  update(@Param('id') id: string, @Body() body: any) {
-    return this.service.update(id, body);
+  update(@Param('id') id: string, @Body() dto: UpdateProductVariantDto) {
+    return this.service.update(id, dto);
   }
 
   @Delete(':id')

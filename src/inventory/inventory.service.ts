@@ -1,6 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateInventoryDto } from './dto/create-inventory.dto';
+import { UpdateInventoryDto } from './dto/update-inventory.dto';
 
 @Injectable()
 export class InventoryService {
@@ -14,15 +20,50 @@ export class InventoryService {
     return this.prisma.inventory.findUnique({ where: { id } });
   }
 
-  create(data: Prisma.InventoryCreateInput) {
-    return this.prisma.inventory.create({ data });
+  async create(dto: CreateInventoryDto) {
+    try {
+      return await this.prisma.inventory.create({ data: dto });
+    } catch (e) {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2002'
+      ) {
+        throw new ConflictException(
+          `Inventory already exists for variant ${dto.variantId}.`,
+        );
+      }
+      throw e;
+    }
   }
 
-  update(id: string, data: Prisma.InventoryUpdateInput) {
-    return this.prisma.inventory.update({ where: { id }, data });
+  async update(id: string, dto: UpdateInventoryDto) {
+    try {
+      return await this.prisma.inventory.update({
+        where: { id },
+        data: dto,
+      });
+    } catch (e) {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2025'
+      ) {
+        throw new NotFoundException(`Inventory ${id} not found.`);
+      }
+      throw e;
+    }
   }
 
-  remove(id: string) {
-    return this.prisma.inventory.delete({ where: { id } });
+  async remove(id: string) {
+    try {
+      return await this.prisma.inventory.delete({ where: { id } });
+    } catch (e) {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2025'
+      ) {
+        throw new NotFoundException(`Inventory ${id} not found.`);
+      }
+      throw e;
+    }
   }
 }
