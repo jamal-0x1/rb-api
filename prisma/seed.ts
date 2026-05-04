@@ -1,5 +1,7 @@
 import * as dotenv from 'dotenv';
 import * as bcrypt from 'bcrypt';
+import * as fs from 'fs';
+import * as path from 'path';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../src/generated/prisma/client';
 
@@ -20,7 +22,6 @@ async function main() {
   await prisma.shipmentItem.deleteMany();
   await prisma.shipment.deleteMany();
   await prisma.payment.deleteMany();
-  await prisma.paymentMethod.deleteMany();
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
   await prisma.cartItem.deleteMany();
@@ -101,123 +102,257 @@ async function main() {
     },
   });
 
-  // ---- Categories (tree) ----
+  // ---- Categories (top-level for homepage) ----
   console.log('seeding categories...');
-  const apparel = await prisma.category.create({
-    data: { name: 'Apparel', slug: 'apparel', sortOrder: 1 },
-  });
-  const tops = await prisma.category.create({
-    data: {
-      name: 'Tops',
-      slug: 'tops',
-      parentId: apparel.id,
-      sortOrder: 1,
-    },
-  });
-  const accessories = await prisma.category.create({
-    data: { name: 'Accessories', slug: 'accessories', sortOrder: 2 },
-  });
+  const CATEGORY_IMAGES_SRC = path.resolve(
+    __dirname,
+    '../../rb-ui/public/images/categories',
+  );
+  const CATEGORY_STORAGE_ROOT = path.resolve(process.cwd(), 'storage/categories');
+  fs.mkdirSync(CATEGORY_STORAGE_ROOT, { recursive: true });
+
+  type SeedCategory = { name: string; slug: string; iconFile: string; sortOrder: number };
+  const seedCategories: SeedCategory[] = [
+    { name: 'Televisions', slug: 'televisions', iconFile: 'categories-01.png', sortOrder: 1 },
+    { name: 'Laptop & PC', slug: 'laptop-pc', iconFile: 'categories-02.png', sortOrder: 2 },
+    { name: 'Mobile & Tablets', slug: 'mobile-tablets', iconFile: 'categories-03.png', sortOrder: 3 },
+    { name: 'Games & Videos', slug: 'games-videos', iconFile: 'categories-04.png', sortOrder: 4 },
+    { name: 'Home Appliances', slug: 'home-appliances', iconFile: 'categories-05.png', sortOrder: 5 },
+    { name: 'Health & Sports', slug: 'health-sports', iconFile: 'categories-06.png', sortOrder: 6 },
+    { name: 'Watches', slug: 'watches', iconFile: 'categories-07.png', sortOrder: 7 },
+  ];
+
+  const categoriesBySlug: Record<string, { id: string }> = {};
+  for (const sc of seedCategories) {
+    const created = await prisma.category.create({
+      data: { name: sc.name, slug: sc.slug, sortOrder: sc.sortOrder },
+    });
+    const src = path.join(CATEGORY_IMAGES_SRC, sc.iconFile);
+    if (fs.existsSync(src)) {
+      const destDir = path.join(CATEGORY_STORAGE_ROOT, created.id);
+      fs.mkdirSync(destDir, { recursive: true });
+      fs.copyFileSync(src, path.join(destDir, sc.iconFile));
+      await prisma.category.update({
+        where: { id: created.id },
+        data: { imageUrl: `/storage/categories/${created.id}/${sc.iconFile}` },
+      });
+    }
+    categoriesBySlug[sc.slug] = { id: created.id };
+  }
+
+  // Aliases for product mapping
+  const computers = categoriesBySlug['laptop-pc'];
+  const phones = categoriesBySlug['mobile-tablets'];
+  const wearables = categoriesBySlug['watches'];
+  const peripherals = categoriesBySlug['laptop-pc'];
+  const networking = categoriesBySlug['laptop-pc'];
+  const games = categoriesBySlug['games-videos'];
+  void networking; void wearables; void peripherals;
 
   // ---- Tags ----
   console.log('seeding tags...');
-  const [tagNew, tagSale, tagOrganic] = await Promise.all([
+  const [tagNew, tagSale, tagFeatured] = await Promise.all([
     prisma.tag.create({ data: { name: 'new' } }),
     prisma.tag.create({ data: { name: 'sale' } }),
-    prisma.tag.create({ data: { name: 'organic' } }),
+    prisma.tag.create({ data: { name: 'featured' } }),
   ]);
 
-  // ---- Products ----
+  // ---- Products (sourced from rb-ui shopData) ----
   console.log('seeding products...');
-  const tee = await prisma.product.create({
-    data: {
-      categoryId: tops.id,
-      sku: 'TEE-001',
-      name: 'Classic Tee',
-      slug: 'classic-tee',
-      description: 'Soft cotton t-shirt.',
-      basePrice: '24.99',
-      currency: 'USD',
-      images: {
-        create: [
-          {
-            url: 'https://cdn.example.com/tee-001-front.jpg',
-            altText: 'Front',
-            isPrimary: true,
-            sortOrder: 0,
-          },
-          {
-            url: 'https://cdn.example.com/tee-001-back.jpg',
-            altText: 'Back',
-            sortOrder: 1,
-          },
-        ],
-      },
-      variants: {
-        create: [
-          {
-            sku: 'TEE-001-S-BLK',
-            size: 'S',
-            color: 'Black',
-            attributes: { fit: 'regular' },
-          },
-          {
-            sku: 'TEE-001-M-BLK',
-            size: 'M',
-            color: 'Black',
-            attributes: { fit: 'regular' },
-          },
-          {
-            sku: 'TEE-001-L-WHT',
-            size: 'L',
-            color: 'White',
-            priceOverride: '26.99',
-            attributes: { fit: 'regular' },
-          },
-        ],
-      },
-    },
-    include: { variants: true },
-  });
 
-  const cap = await prisma.product.create({
-    data: {
-      categoryId: accessories.id,
-      sku: 'CAP-001',
-      name: 'Snapback Cap',
-      slug: 'snapback-cap',
-      description: 'Adjustable snapback.',
-      basePrice: '19.99',
-      images: {
-        create: [
-          {
-            url: 'https://cdn.example.com/cap-001.jpg',
-            altText: 'Cap',
-            isPrimary: true,
-          },
-        ],
-      },
-      variants: {
-        create: [
-          { sku: 'CAP-001-OS-NVY', size: 'OS', color: 'Navy' },
-          { sku: 'CAP-001-OS-RED', size: 'OS', color: 'Red' },
-        ],
-      },
-    },
-    include: { variants: true },
-  });
+  const SOURCE_IMAGES = path.resolve(__dirname, '../../rb-ui/public/images/products');
+  const STORAGE_ROOT = path.resolve(process.cwd(), 'storage/products');
 
-  // ---- ProductTags ----
-  await prisma.productTag.createMany({
-    data: [
-      { productId: tee.id, tagId: tagNew.id },
-      { productId: tee.id, tagId: tagOrganic.id },
-      { productId: cap.id, tagId: tagSale.id },
-    ],
-  });
+  type SeedProduct = {
+    sourceId: number;
+    sku: string;
+    name: string;
+    slug: string;
+    description: string;
+    basePrice: string;
+    categoryId: string;
+    tagIds: string[];
+    variants: { sku: string; size?: string; color?: string; priceOverride?: string }[];
+  };
+
+  const seedProducts: SeedProduct[] = [
+    {
+      sourceId: 1,
+      sku: 'GP-HV-G69',
+      name: 'Havit HV-G69 USB Gamepad',
+      slug: 'havit-hv-g69-usb-gamepad',
+      description: 'Wired USB gamepad with vibration feedback.',
+      basePrice: '3290',
+      categoryId: games.id,
+      tagIds: [tagSale.id],
+      variants: [{ sku: 'GP-HV-G69-BLK', color: 'Black' }],
+    },
+    {
+      sourceId: 2,
+      sku: 'IP-14P-128',
+      name: 'iPhone 14 Plus 6/128GB',
+      slug: 'iphone-14-plus-6-128gb',
+      description: 'Apple iPhone 14 Plus with 6GB RAM and 128GB storage.',
+      basePrice: '98900',
+      categoryId: phones.id,
+      tagIds: [tagFeatured.id, tagNew.id],
+      variants: [
+        { sku: 'IP-14P-128-MID', color: 'Midnight' },
+        { sku: 'IP-14P-128-PUR', color: 'Purple' },
+      ],
+    },
+    {
+      sourceId: 3,
+      sku: 'AP-IMAC-M1-24',
+      name: 'Apple iMac M1 24-inch 2021',
+      slug: 'apple-imac-m1-24-2021',
+      description: 'All-in-one desktop with M1 chip and 24-inch Retina display.',
+      basePrice: '149900',
+      categoryId: computers.id,
+      tagIds: [tagFeatured.id],
+      variants: [{ sku: 'AP-IMAC-M1-24-SLV', color: 'Silver' }],
+    },
+    {
+      sourceId: 4,
+      sku: 'AP-MBA-M1-256',
+      name: 'MacBook Air M1 8/256GB',
+      slug: 'macbook-air-m1-8-256gb',
+      description: 'Apple MacBook Air with M1 chip, 8GB unified memory, 256GB SSD.',
+      basePrice: '109900',
+      categoryId: computers.id,
+      tagIds: [tagNew.id, tagFeatured.id],
+      variants: [
+        { sku: 'AP-MBA-M1-256-SG', color: 'Space Gray' },
+        { sku: 'AP-MBA-M1-256-SLV', color: 'Silver' },
+      ],
+    },
+    {
+      sourceId: 5,
+      sku: 'AP-AW-ULTRA',
+      name: 'Apple Watch Ultra',
+      slug: 'apple-watch-ultra',
+      description: 'Rugged titanium Apple Watch built for adventure.',
+      basePrice: '89900',
+      categoryId: categoriesBySlug['watches'].id,
+      tagIds: [tagNew.id, tagFeatured.id],
+      variants: [
+        { sku: 'AP-AW-ULTRA-41', size: '41mm', color: 'Titanium' },
+        { sku: 'AP-AW-ULTRA-45', size: '45mm', color: 'Titanium' },
+        { sku: 'AP-AW-ULTRA-49', size: '49mm', color: 'Titanium' },
+      ],
+    },
+    {
+      sourceId: 6,
+      sku: 'LG-MX3',
+      name: 'Logitech MX Master 3 Mouse',
+      slug: 'logitech-mx-master-3-mouse',
+      description: 'Advanced wireless mouse with MagSpeed scrolling.',
+      basePrice: '11900',
+      categoryId: peripherals.id,
+      tagIds: [tagSale.id, tagFeatured.id],
+      variants: [
+        { sku: 'LG-MX3-GRP', color: 'Graphite' },
+        { sku: 'LG-MX3-PG', color: 'Pale Gray' },
+      ],
+    },
+    {
+      sourceId: 7,
+      sku: 'AP-IPAD-AIR5-64',
+      name: 'Apple iPad Air 5th Gen 64GB',
+      slug: 'apple-ipad-air-5-64gb',
+      description: 'Apple iPad Air with M1 chip, 10.9-inch Liquid Retina display.',
+      basePrice: '64900',
+      categoryId: phones.id,
+      tagIds: [tagNew.id, tagFeatured.id],
+      variants: [
+        { sku: 'AP-IPAD-AIR5-64-BLU', color: 'Blue' },
+        { sku: 'AP-IPAD-AIR5-64-SG', color: 'Space Gray' },
+      ],
+    },
+    {
+      sourceId: 8,
+      sku: 'AS-RT-DB',
+      name: 'Asus RT Dual Band Router',
+      slug: 'asus-rt-dual-band-router',
+      description: 'Dual-band Wi-Fi 6 gigabit router with mesh support.',
+      basePrice: '14900',
+      categoryId: networking.id,
+      tagIds: [tagSale.id],
+      variants: [{ sku: 'AS-RT-DB-BLK', color: 'Black' }],
+    },
+  ];
+
+  function copyImages(productId: string, sourceId: number) {
+    const candidates = [
+      { file: `product-${sourceId}-bg-1.png`, alt: 'Front', isPrimary: true },
+      { file: `product-${sourceId}-bg-2.png`, alt: 'Back', isPrimary: false },
+      { file: `product-${sourceId}-sm-1.png`, alt: 'Thumb 1', isPrimary: false },
+      { file: `product-${sourceId}-sm-2.png`, alt: 'Thumb 2', isPrimary: false },
+    ];
+    const dest = path.join(STORAGE_ROOT, productId);
+    fs.mkdirSync(dest, { recursive: true });
+    const records: { url: string; altText: string; isPrimary: boolean; sortOrder: number }[] = [];
+    candidates.forEach((c, i) => {
+      const src = path.join(SOURCE_IMAGES, c.file);
+      if (!fs.existsSync(src)) return;
+      fs.copyFileSync(src, path.join(dest, c.file));
+      records.push({
+        url: `/storage/products/${productId}/${c.file}`,
+        altText: c.alt,
+        isPrimary: c.isPrimary,
+        sortOrder: i,
+      });
+    });
+    return records;
+  }
+
+  const createdProducts: Array<{
+    id: string;
+    name: string;
+    sku: string;
+    variants: Array<{ id: string; sku: string }>;
+  }> = [];
+
+  for (const sp of seedProducts) {
+    const product = await prisma.product.create({
+      data: {
+        categoryId: sp.categoryId,
+        sku: sp.sku,
+        name: sp.name,
+        slug: sp.slug,
+        description: sp.description,
+        basePrice: sp.basePrice,
+        currency: 'BDT',
+        variants: { create: sp.variants },
+      },
+      include: { variants: true },
+    });
+    const imageRecords = copyImages(product.id, sp.sourceId);
+    if (imageRecords.length > 0) {
+      await prisma.productImage.createMany({
+        data: imageRecords.map((r) => ({ ...r, productId: product.id })),
+      });
+    }
+    if (sp.tagIds.length > 0) {
+      await prisma.productTag.createMany({
+        data: sp.tagIds.map((tagId) => ({ productId: product.id, tagId })),
+      });
+    }
+    createdProducts.push({
+      id: product.id,
+      name: product.name,
+      sku: product.sku,
+      variants: product.variants.map((v) => ({ id: v.id, sku: v.sku })),
+    });
+  }
+
+  // Aliases for downstream cart/order/review/wishlist seeds
+  const tee = createdProducts[1]; // iPhone (used as primary order item)
+  const cap = createdProducts[5]; // MX Master mouse
 
   // ---- Inventory ----
   console.log('seeding inventory...');
-  const allVariants = [...tee.variants, ...cap.variants];
+  const allVariants = createdProducts.flatMap((p) => p.variants);
   await Promise.all(
     allVariants.map((v, i) =>
       prisma.inventory.create({
@@ -245,10 +380,10 @@ async function main() {
   });
   await prisma.coupon.create({
     data: {
-      code: 'FLAT5',
+      code: 'FLAT500',
       discountType: 'fixed',
-      discountValue: '5',
-      minOrderAmount: '15',
+      discountValue: '500',
+      minOrderAmount: '2000',
     },
   });
 
@@ -262,31 +397,16 @@ async function main() {
         create: [
           {
             variantId: tee.variants[1].id,
-            quantity: 2,
-            unitPriceSnapshot: '24.99',
+            quantity: 1,
+            unitPriceSnapshot: '98900',
           },
           {
             variantId: cap.variants[0].id,
             quantity: 1,
-            unitPriceSnapshot: '19.99',
+            unitPriceSnapshot: '11900',
           },
         ],
       },
-    },
-  });
-
-  // ---- PaymentMethod for Jane ----
-  console.log('seeding payment methods...');
-  const janePm = await prisma.paymentMethod.create({
-    data: {
-      userId: jane.id,
-      provider: 'stripe',
-      providerToken: 'pm_test_jane_visa',
-      brand: 'visa',
-      last4: '4242',
-      expMonth: 12,
-      expYear: 2030,
-      isDefault: true,
     },
   });
 
@@ -299,13 +419,13 @@ async function main() {
     data: {
       userId: bob.id,
       orderNumber: 'ORD-1001',
-      status: 'paid',
-      subtotal: '69.97',
-      taxAmount: '5.60',
-      shippingAmount: '7.00',
+      status: 'delivered',
+      subtotal: '209700',
+      taxAmount: '15728',
+      shippingAmount: '500',
       discountAmount: '0',
-      grandTotal: '82.57',
-      currency: 'USD',
+      grandTotal: '225928',
+      currency: 'BDT',
       shippingAddressId: bobAddress!.id,
       billingAddressId: bobAddress!.id,
       items: {
@@ -313,16 +433,16 @@ async function main() {
           {
             variantId: tee.variants[0].id,
             quantity: 2,
-            unitPrice: '24.99',
-            lineTotal: '49.98',
+            unitPrice: '98900',
+            lineTotal: '197800',
             productNameSnapshot: tee.name,
             variantSkuSnapshot: tee.variants[0].sku,
           },
           {
             variantId: cap.variants[1].id,
             quantity: 1,
-            unitPrice: '19.99',
-            lineTotal: '19.99',
+            unitPrice: '11900',
+            lineTotal: '11900',
             productNameSnapshot: cap.name,
             variantSkuSnapshot: cap.variants[1].sku,
           },
@@ -332,18 +452,17 @@ async function main() {
     include: { items: true },
   });
 
-  // ---- Payment ----
+  // ---- Payment (cash on delivery) ----
   console.log('seeding payment...');
   await prisma.payment.create({
     data: {
       orderId: order.id,
-      paymentMethodId: null,
-      provider: 'stripe',
-      providerChargeId: 'ch_test_1001',
-      amount: '82.57',
-      currency: 'USD',
-      status: 'succeeded',
-      processedAt: new Date(),
+      method: 'cod',
+      amount: '225928',
+      currency: 'BDT',
+      status: 'collected',
+      collectedAt: new Date(),
+      notes: 'Collected on delivery',
     },
   });
 
@@ -374,8 +493,8 @@ async function main() {
       productId: tee.id,
       orderItemId: order.items[0].id,
       rating: 5,
-      title: 'Love it',
-      body: 'Great fit, soft fabric.',
+      title: 'Worth every taka',
+      body: 'Display is gorgeous, battery lasts a full day.',
       verifiedPurchase: true,
     },
   });
@@ -384,8 +503,8 @@ async function main() {
       userId: jane.id,
       productId: cap.id,
       rating: 4,
-      title: 'Solid cap',
-      body: 'Color slightly off but still good.',
+      title: 'Smooth scrolling',
+      body: 'MagSpeed wheel is genuinely useful — minor learning curve.',
     },
   });
 
@@ -394,11 +513,12 @@ async function main() {
   await prisma.wishlist.create({
     data: {
       userId: jane.id,
-      name: 'Summer picks',
+      name: 'Wishlist',
       isPublic: false,
       items: {
         create: [
-          { variantId: tee.variants[2].id },
+          { variantId: createdProducts[0].variants[0].id },
+          { variantId: createdProducts[4].variants[0].id },
           { variantId: cap.variants[0].id },
         ],
       },

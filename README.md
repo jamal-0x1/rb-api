@@ -1,3 +1,20 @@
+# RB API — Accessories Storefront Backend
+
+> **Domain:** Consumer accessories ecommerce (BDT). Schema, seed catalog, and product/filter endpoints are tuned for small electronics + lifestyle accessories (mobile/tablet, watches, peripherals, gamepads, networking). Optional product attributes — `variants.size`, `variants.color`, `tags`, `attributes` JSON — exist for accessory-class metadata; bulk fashion sizing is intentionally absent.
+
+## Production URLs
+
+- API: `https://rb-api.orbitalmind.xyz/api`
+- Swagger: `/api/docs`
+
+Local dev runs on `PORT=3000`. See `~/Canvas/ryad/kb/2026-05-04-session-rb-api-rb-admin.md` for the full stack/deploy playbook (Prisma 7 driver-adapter, cPanel quirks, env chain, Cloudflare DNS).
+
+## Storefront filter surface
+
+`GET /api/products` accepts: `categoryId | categoryIds (csv) | tag | tags (csv) | sizes (csv) | colors (csv) | minPrice | maxPrice | inStock | sort=latest|oldest|price-asc|price-desc | limit`. Pair with `GET /api/products/facets` to render filter UIs (returns `categories | sizes | colors | tags | priceRange` with counts).
+
+---
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>

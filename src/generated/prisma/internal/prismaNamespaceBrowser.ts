@@ -65,7 +65,6 @@ export const ModelName = {
   Coupon: 'Coupon',
   Order: 'Order',
   OrderItem: 'OrderItem',
-  PaymentMethod: 'PaymentMethod',
   Payment: 'Payment',
   Shipment: 'Shipment',
   ShipmentItem: 'ShipmentItem',
@@ -130,6 +129,7 @@ export const CategoryScalarFieldEnum = {
   name: 'name',
   slug: 'slug',
   description: 'description',
+  imageUrl: 'imageUrl',
   sortOrder: 'sortOrder',
   createdAt: 'createdAt'
 } as const
@@ -144,6 +144,9 @@ export const ProductScalarFieldEnum = {
   name: 'name',
   slug: 'slug',
   description: 'description',
+  specifications: 'specifications',
+  careInstructions: 'careInstructions',
+  attributes: 'attributes',
   basePrice: 'basePrice',
   currency: 'currency',
   active: 'active',
@@ -282,32 +285,15 @@ export const OrderItemScalarFieldEnum = {
 export type OrderItemScalarFieldEnum = (typeof OrderItemScalarFieldEnum)[keyof typeof OrderItemScalarFieldEnum]
 
 
-export const PaymentMethodScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  provider: 'provider',
-  providerToken: 'providerToken',
-  brand: 'brand',
-  last4: 'last4',
-  expMonth: 'expMonth',
-  expYear: 'expYear',
-  isDefault: 'isDefault',
-  createdAt: 'createdAt'
-} as const
-
-export type PaymentMethodScalarFieldEnum = (typeof PaymentMethodScalarFieldEnum)[keyof typeof PaymentMethodScalarFieldEnum]
-
-
 export const PaymentScalarFieldEnum = {
   id: 'id',
   orderId: 'orderId',
-  paymentMethodId: 'paymentMethodId',
-  provider: 'provider',
-  providerChargeId: 'providerChargeId',
+  method: 'method',
   amount: 'amount',
   currency: 'currency',
   status: 'status',
-  processedAt: 'processedAt',
+  collectedAt: 'collectedAt',
+  notes: 'notes',
   createdAt: 'createdAt'
 } as const
 

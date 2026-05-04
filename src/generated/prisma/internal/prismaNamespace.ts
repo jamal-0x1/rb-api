@@ -398,7 +398,6 @@ export const ModelName = {
   Coupon: 'Coupon',
   Order: 'Order',
   OrderItem: 'OrderItem',
-  PaymentMethod: 'PaymentMethod',
   Payment: 'Payment',
   Shipment: 'Shipment',
   ShipmentItem: 'ShipmentItem',
@@ -420,7 +419,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "address" | "category" | "product" | "tag" | "productTag" | "productVariant" | "productImage" | "inventory" | "cart" | "cartItem" | "coupon" | "order" | "orderItem" | "paymentMethod" | "payment" | "shipment" | "shipmentItem" | "review" | "wishlist" | "wishlistItem"
+    modelProps: "user" | "address" | "category" | "product" | "tag" | "productTag" | "productVariant" | "productImage" | "inventory" | "cart" | "cartItem" | "coupon" | "order" | "orderItem" | "payment" | "shipment" | "shipmentItem" | "review" | "wishlist" | "wishlistItem"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1460,80 +1459,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
-    PaymentMethod: {
-      payload: Prisma.$PaymentMethodPayload<ExtArgs>
-      fields: Prisma.PaymentMethodFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.PaymentMethodFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentMethodPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.PaymentMethodFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentMethodPayload>
-        }
-        findFirst: {
-          args: Prisma.PaymentMethodFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentMethodPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.PaymentMethodFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentMethodPayload>
-        }
-        findMany: {
-          args: Prisma.PaymentMethodFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentMethodPayload>[]
-        }
-        create: {
-          args: Prisma.PaymentMethodCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentMethodPayload>
-        }
-        createMany: {
-          args: Prisma.PaymentMethodCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.PaymentMethodCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentMethodPayload>[]
-        }
-        delete: {
-          args: Prisma.PaymentMethodDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentMethodPayload>
-        }
-        update: {
-          args: Prisma.PaymentMethodUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentMethodPayload>
-        }
-        deleteMany: {
-          args: Prisma.PaymentMethodDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.PaymentMethodUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.PaymentMethodUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentMethodPayload>[]
-        }
-        upsert: {
-          args: Prisma.PaymentMethodUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentMethodPayload>
-        }
-        aggregate: {
-          args: Prisma.PaymentMethodAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregatePaymentMethod>
-        }
-        groupBy: {
-          args: Prisma.PaymentMethodGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.PaymentMethodGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.PaymentMethodCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.PaymentMethodCountAggregateOutputType> | number
-        }
-      }
-    }
     Payment: {
       payload: Prisma.$PaymentPayload<ExtArgs>
       fields: Prisma.PaymentFieldRefs
@@ -2057,6 +1982,7 @@ export const CategoryScalarFieldEnum = {
   name: 'name',
   slug: 'slug',
   description: 'description',
+  imageUrl: 'imageUrl',
   sortOrder: 'sortOrder',
   createdAt: 'createdAt'
 } as const
@@ -2071,6 +1997,9 @@ export const ProductScalarFieldEnum = {
   name: 'name',
   slug: 'slug',
   description: 'description',
+  specifications: 'specifications',
+  careInstructions: 'careInstructions',
+  attributes: 'attributes',
   basePrice: 'basePrice',
   currency: 'currency',
   active: 'active',
@@ -2209,32 +2138,15 @@ export const OrderItemScalarFieldEnum = {
 export type OrderItemScalarFieldEnum = (typeof OrderItemScalarFieldEnum)[keyof typeof OrderItemScalarFieldEnum]
 
 
-export const PaymentMethodScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  provider: 'provider',
-  providerToken: 'providerToken',
-  brand: 'brand',
-  last4: 'last4',
-  expMonth: 'expMonth',
-  expYear: 'expYear',
-  isDefault: 'isDefault',
-  createdAt: 'createdAt'
-} as const
-
-export type PaymentMethodScalarFieldEnum = (typeof PaymentMethodScalarFieldEnum)[keyof typeof PaymentMethodScalarFieldEnum]
-
-
 export const PaymentScalarFieldEnum = {
   id: 'id',
   orderId: 'orderId',
-  paymentMethodId: 'paymentMethodId',
-  provider: 'provider',
-  providerChargeId: 'providerChargeId',
+  method: 'method',
   amount: 'amount',
   currency: 'currency',
   status: 'status',
-  processedAt: 'processedAt',
+  collectedAt: 'collectedAt',
+  notes: 'notes',
   createdAt: 'createdAt'
 } as const
 
@@ -2398,20 +2310,6 @@ export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
- * Reference to a field of type 'Decimal'
- */
-export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
-    
-
-
-/**
- * Reference to a field of type 'Decimal[]'
- */
-export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
-    
-
-
-/**
  * Reference to a field of type 'Json'
  */
 export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -2422,6 +2320,20 @@ export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'J
  * Reference to a field of type 'QueryMode'
  */
 export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
+ * Reference to a field of type 'Decimal'
+ */
+export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
+    
+
+
+/**
+ * Reference to a field of type 'Decimal[]'
+ */
+export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
     
 
 
@@ -2562,7 +2474,6 @@ export type GlobalOmitConfig = {
   coupon?: Prisma.CouponOmit
   order?: Prisma.OrderOmit
   orderItem?: Prisma.OrderItemOmit
-  paymentMethod?: Prisma.PaymentMethodOmit
   payment?: Prisma.PaymentOmit
   shipment?: Prisma.ShipmentOmit
   shipmentItem?: Prisma.ShipmentItemOmit

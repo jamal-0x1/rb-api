@@ -6,3 +6,7 @@ node_modules
 /generated/prisma
 dist/
 *.zip
+
+# Uploaded files
+/storage/*
+!/storage/.gitkeep

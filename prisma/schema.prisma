@@ -26,7 +26,6 @@ model User {
   cart            Cart?
   reviews         Review[]
   wishlists       Wishlist[]
-  paymentMethods  PaymentMethod[]
 
   @@map("users")
 }
@@ -59,6 +58,7 @@ model Category {
   name        String
   slug        String     @unique
   description String?
+  imageUrl    String?    @map("image_url")
   sortOrder   Int        @default(0) @map("sort_order")
   createdAt   DateTime   @default(now()) @map("created_at")
 
@@ -76,9 +76,12 @@ model Product {
   sku         String   @unique
   name        String
   slug        String   @unique
-  description String?
+  description     String?
+  specifications  String? @db.Text
+  careInstructions String? @db.Text @map("care_instructions")
+  attributes      Json?
   basePrice   Decimal  @map("base_price") @db.Decimal(10, 2)
-  currency    String   @default("USD")
+  currency    String   @default("BDT")
   active      Boolean  @default(true)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -217,7 +220,7 @@ model Order {
   shippingAmount      Decimal  @default(0) @map("shipping_amount") @db.Decimal(10, 2)
   discountAmount      Decimal  @default(0) @map("discount_amount") @db.Decimal(10, 2)
   grandTotal          Decimal  @map("grand_total") @db.Decimal(10, 2)
-  currency            String   @default("USD")
+  currency            String   @default("BDT")
   shippingAddressId   String?  @map("shipping_address_id")
   billingAddressId    String?  @map("billing_address_id")
   couponId            String?  @map("coupon_id")
@@ -254,39 +257,18 @@ model OrderItem {
   @@map("order_items")
 }
 
-model PaymentMethod {
-  id             String  @id @default(uuid())
-  userId         String  @map("user_id")
-  provider       String
-  providerToken  String  @map("provider_token")
-  brand          String?
-  last4          String?
-  expMonth       Int?    @map("exp_month")
-  expYear        Int?    @map("exp_year")
-  isDefault      Boolean @default(false) @map("is_default")
-  createdAt      DateTime @default(now()) @map("created_at")
-
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  payments Payment[]
-
-  @@index([userId])
-  @@map("payment_methods")
-}
-
 model Payment {
-  id                  String   @id @default(uuid())
-  orderId             String   @map("order_id")
-  paymentMethodId     String?  @map("payment_method_id")
-  provider            String
-  providerChargeId    String?  @map("provider_charge_id")
-  amount              Decimal  @db.Decimal(10, 2)
-  currency            String   @default("USD")
-  status              String
-  processedAt         DateTime? @map("processed_at")
-  createdAt           DateTime @default(now()) @map("created_at")
+  id           String    @id @default(uuid())
+  orderId      String    @map("order_id")
+  method       String    @default("cod")
+  amount       Decimal   @db.Decimal(10, 2)
+  currency     String    @default("BDT")
+  status       String    @default("pending")
+  collectedAt  DateTime? @map("collected_at")
+  notes        String?
+  createdAt    DateTime  @default(now()) @map("created_at")
 
-  order         Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  paymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@index([orderId])
   @@map("payments")

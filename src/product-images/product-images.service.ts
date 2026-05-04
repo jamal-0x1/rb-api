@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { unlink } from 'fs/promises';
+import { join } from 'path';
 import { Prisma } from '../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -22,7 +24,13 @@ export class ProductImagesService {
     return this.prisma.productImage.update({ where: { id }, data });
   }
 
-  remove(id: string) {
-    return this.prisma.productImage.delete({ where: { id } });
+  async remove(id: string) {
+    const row = await this.prisma.productImage.findUnique({ where: { id } });
+    const deleted = await this.prisma.productImage.delete({ where: { id } });
+    if (row?.url?.startsWith('/storage/')) {
+      const filePath = join(process.cwd(), row.url.replace(/^\//, ''));
+      await unlink(filePath).catch(() => undefined);
+    }
+    return deleted;
   }
 }
