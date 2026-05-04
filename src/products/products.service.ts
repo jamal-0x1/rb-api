@@ -94,7 +94,7 @@ export class ProductsService {
       where: this.buildWhere(opts),
       include: {
         images: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }] },
-        variants: true,
+        variants: { include: { inventory: true } },
         category: true,
         tags: { include: { tag: true } },
       },
@@ -185,23 +185,36 @@ export class ProductsService {
       where: { id },
       include: {
         images: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }] },
-        variants: true,
+        variants: { include: { inventory: true } },
         category: true,
         tags: { include: { tag: true } },
       },
     });
   }
 
-  findBySlug(slug: string) {
-    return this.prisma.product.findUnique({
+  async findBySlug(slug: string) {
+    const product = await this.prisma.product.findUnique({
       where: { slug },
       include: {
         images: { orderBy: [{ isPrimary: 'desc' }, { sortOrder: 'asc' }] },
-        variants: true,
+        variants: { include: { inventory: true } },
         category: true,
         tags: { include: { tag: true } },
       },
     });
+    if (!product) return null;
+    const stats = await this.prisma.review.aggregate({
+      where: { productId: product.id },
+      _count: { _all: true },
+      _avg: { rating: true },
+    });
+    return {
+      ...product,
+      reviewStats: {
+        count: stats._count._all,
+        average: Number(stats._avg.rating ?? 0),
+      },
+    };
   }
 
   create(data: Prisma.ProductCreateInput) {

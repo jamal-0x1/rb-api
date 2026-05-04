@@ -6,14 +6,35 @@ import {
   Param,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { CreateReviewDto } from './dto/create-review.dto';
 import { ReviewsService } from './reviews.service';
 
 @ApiTags('reviews')
 @Controller('reviews')
 export class ReviewsController {
   constructor(private readonly service: ReviewsService) {}
+
+  @Get('product/:productId')
+  @ApiOperation({ summary: 'List reviews for a product (with stats)' })
+  listByProduct(@Param('productId') productId: string) {
+    return this.service.listByProduct(productId);
+  }
+
+  @Post()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Create a review (auth required)' })
+  createForUser(
+    @CurrentUser() user: { id: string },
+    @Body() dto: CreateReviewDto,
+  ) {
+    return this.service.createForUser(user.id, dto);
+  }
 
   @Get()
   @ApiOperation({ summary: 'List' })
@@ -25,12 +46,6 @@ export class ReviewsController {
   @ApiOperation({ summary: 'Get one' })
   findOne(@Param('id') id: string) {
     return this.service.findOne(id);
-  }
-
-  @Post()
-  @ApiOperation({ summary: 'Create' })
-  create(@Body() body: any) {
-    return this.service.create(body);
   }
 
   @Patch(':id')
