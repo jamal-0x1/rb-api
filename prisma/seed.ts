@@ -147,6 +147,9 @@ async function main() {
   const peripherals = categoriesBySlug['laptop-pc'];
   const networking = categoriesBySlug['laptop-pc'];
   const games = categoriesBySlug['games-videos'];
+  const televisions = categoriesBySlug['televisions'];
+  const homeAppliances = categoriesBySlug['home-appliances'];
+  const healthSports = categoriesBySlug['health-sports'];
   void networking; void wearables; void peripherals;
 
   // ---- Tags ----
@@ -279,6 +282,117 @@ async function main() {
       categoryId: networking.id,
       tagIds: [tagSale.id],
       variants: [{ sku: 'AS-RT-DB-BLK', color: 'Black' }],
+    },
+
+    // Televisions
+    {
+      sourceId: 9,
+      sku: 'SM-QLED-55',
+      name: 'Samsung 55" QLED 4K Smart TV',
+      slug: 'samsung-55-qled-4k-smart-tv',
+      description: 'Quantum Dot 4K UHD smart TV with HDR10+ and Tizen OS.',
+      basePrice: '129900',
+      categoryId: televisions.id,
+      tagIds: [tagFeatured.id, tagNew.id],
+      variants: [{ sku: 'SM-QLED-55-BLK', size: '55"', color: 'Black' }],
+    },
+    {
+      sourceId: 10,
+      sku: 'SN-BR-65',
+      name: 'Sony Bravia 65" 4K Google TV',
+      slug: 'sony-bravia-65-4k-google-tv',
+      description: 'X-Reality PRO 4K HDR LED panel with Google TV.',
+      basePrice: '174900',
+      categoryId: televisions.id,
+      tagIds: [tagFeatured.id],
+      variants: [{ sku: 'SN-BR-65-BLK', size: '65"', color: 'Black' }],
+    },
+    {
+      sourceId: 11,
+      sku: 'LG-OLED-50',
+      name: 'LG OLED 50" Evo C3',
+      slug: 'lg-oled-50-evo-c3',
+      description: 'Self-lit OLED with α9 AI Processor Gen6 and Dolby Vision.',
+      basePrice: '189900',
+      categoryId: televisions.id,
+      tagIds: [tagNew.id],
+      variants: [{ sku: 'LG-OLED-50-BLK', size: '50"', color: 'Black' }],
+    },
+
+    // Home Appliances
+    {
+      sourceId: 12,
+      sku: 'XM-AP-4',
+      name: 'Xiaomi Smart Air Purifier 4',
+      slug: 'xiaomi-smart-air-purifier-4',
+      description: 'HEPA H13 filter, OLED display, app-controlled.',
+      basePrice: '18900',
+      categoryId: homeAppliances.id,
+      tagIds: [tagSale.id, tagNew.id],
+      variants: [{ sku: 'XM-AP-4-WHT', color: 'White' }],
+    },
+    {
+      sourceId: 13,
+      sku: 'PH-AF-XXL',
+      name: 'Philips Airfryer XXL Premium',
+      slug: 'philips-airfryer-xxl-premium',
+      description: 'Twin TurboStar 7.3L air fryer with Smart Sensing.',
+      basePrice: '28900',
+      categoryId: homeAppliances.id,
+      tagIds: [tagFeatured.id],
+      variants: [{ sku: 'PH-AF-XXL-BLK', color: 'Black' }],
+    },
+    {
+      sourceId: 14,
+      sku: 'DK-AC-15-INV',
+      name: 'Daikin 1.5 Ton Inverter AC',
+      slug: 'daikin-1-5-ton-inverter-ac',
+      description: '5-star inverter split AC with Coanda airflow and PM2.5 filter.',
+      basePrice: '64900',
+      categoryId: homeAppliances.id,
+      tagIds: [tagFeatured.id, tagSale.id],
+      variants: [{ sku: 'DK-AC-15-INV-WHT', color: 'White' }],
+    },
+
+    // Health & Sports
+    {
+      sourceId: 15,
+      sku: 'XM-MB-8',
+      name: 'Xiaomi Mi Band 8',
+      slug: 'xiaomi-mi-band-8',
+      description: '1.62" AMOLED fitness band with 150+ workout modes.',
+      basePrice: '4990',
+      categoryId: healthSports.id,
+      tagIds: [tagNew.id, tagSale.id],
+      variants: [
+        { sku: 'XM-MB-8-BLK', color: 'Graphite' },
+        { sku: 'XM-MB-8-GLD', color: 'Champagne Gold' },
+      ],
+    },
+    {
+      sourceId: 16,
+      sku: 'YM-PRO-6MM',
+      name: 'Pro TPE Yoga Mat 6mm',
+      slug: 'pro-tpe-yoga-mat-6mm',
+      description: 'Eco-friendly TPE yoga mat with non-slip texture, carry strap.',
+      basePrice: '2490',
+      categoryId: healthSports.id,
+      tagIds: [tagSale.id],
+      variants: [
+        { sku: 'YM-PRO-6MM-BLU', color: 'Blue' },
+        { sku: 'YM-PRO-6MM-PUR', color: 'Purple' },
+      ],
+    },
+    {
+      sourceId: 17,
+      sku: 'ADJ-DB-24KG',
+      name: 'Adjustable Dumbbell 24kg Pair',
+      slug: 'adjustable-dumbbell-24kg-pair',
+      description: 'Quick-select adjustable dumbbell pair, 2.5–24kg per side.',
+      basePrice: '14900',
+      categoryId: healthSports.id,
+      tagIds: [tagFeatured.id],
+      variants: [{ sku: 'ADJ-DB-24KG-BLK', color: 'Black' }],
     },
   ];
 

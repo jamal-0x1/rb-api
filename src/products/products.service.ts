@@ -104,21 +104,30 @@ export class ProductsService {
   }
 
   async facets() {
-    const products = await this.prisma.product.findMany({
-      where: { active: true },
-      select: {
-        basePrice: true,
-        categoryId: true,
-        category: { select: { id: true, name: true, slug: true } },
-        variants: { select: { size: true, color: true } },
-        tags: { include: { tag: { select: { name: true } } } },
-      },
-    });
+    const [products, topLevelCategories] = await Promise.all([
+      this.prisma.product.findMany({
+        where: { active: true },
+        select: {
+          basePrice: true,
+          categoryId: true,
+          category: { select: { id: true, name: true, slug: true } },
+          variants: { select: { size: true, color: true } },
+          tags: { include: { tag: { select: { name: true } } } },
+        },
+      }),
+      this.prisma.category.findMany({
+        where: { parentId: null },
+        select: { id: true, name: true, slug: true },
+      }),
+    ]);
 
     const categoryMap = new Map<
       string,
       { id: string; name: string; slug: string; count: number }
     >();
+    for (const c of topLevelCategories) {
+      categoryMap.set(c.id, { id: c.id, name: c.name, slug: c.slug, count: 0 });
+    }
     const sizeMap = new Map<string, number>();
     const colorMap = new Map<string, number>();
     const tagMap = new Map<string, number>();
