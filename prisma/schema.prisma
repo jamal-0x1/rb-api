@@ -77,9 +77,17 @@ model Product {
   name        String
   slug        String   @unique
   description     String?
+  shortDescription String? @map("short_description")
   specifications  String? @db.Text
   careInstructions String? @db.Text @map("care_instructions")
   attributes      Json?
+  metaTitle       String? @map("meta_title")
+  metaDescription String? @map("meta_description")
+  brand           String?
+  mpn             String?
+  condition       String  @default("new")
+  keywords        String? @db.Text
+  noIndex         Boolean @default(false) @map("no_index")
   basePrice   Decimal  @map("base_price") @db.Decimal(10, 2)
   currency    String   @default("BDT")
   active      Boolean  @default(true)
@@ -93,6 +101,7 @@ model Product {
   reviews   Review[]
 
   @@index([categoryId])
+  @@index([brand])
   @@map("products")
 }
 

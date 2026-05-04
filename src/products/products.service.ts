@@ -32,6 +32,10 @@ export class ProductsService {
         { name: { contains: q, mode: 'insensitive' } },
         { sku: { contains: q, mode: 'insensitive' } },
         { description: { contains: q, mode: 'insensitive' } },
+        { shortDescription: { contains: q, mode: 'insensitive' } },
+        { brand: { contains: q, mode: 'insensitive' } },
+        { mpn: { contains: q, mode: 'insensitive' } },
+        { keywords: { contains: q, mode: 'insensitive' } },
       ];
     }
 
