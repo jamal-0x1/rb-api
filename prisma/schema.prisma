@@ -237,6 +237,7 @@ model Order {
   shippingAddressId   String?  @map("shipping_address_id")
   billingAddressId    String?  @map("billing_address_id")
   couponId            String?  @map("coupon_id")
+  notes               String?  @db.Text
   placedAt            DateTime @default(now()) @map("placed_at")
 
   user            User        @relation(fields: [userId], references: [id])
@@ -246,9 +247,26 @@ model Order {
   items           OrderItem[]
   payments        Payment[]
   shipments       Shipment[]
+  events          OrderEvent[]
 
   @@index([userId])
   @@map("orders")
+}
+
+model OrderEvent {
+  id          String   @id @default(uuid())
+  orderId     String   @map("order_id")
+  type        String
+  message     String   @db.Text
+  payload     Json?
+  actorUserId String?  @map("actor_user_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([createdAt])
+  @@map("order_events")
 }
 
 model OrderItem {

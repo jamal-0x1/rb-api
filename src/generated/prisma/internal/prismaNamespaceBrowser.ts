@@ -64,6 +64,7 @@ export const ModelName = {
   CartItem: 'CartItem',
   Coupon: 'Coupon',
   Order: 'Order',
+  OrderEvent: 'OrderEvent',
   OrderItem: 'OrderItem',
   Payment: 'Payment',
   Shipment: 'Shipment',
@@ -274,10 +275,24 @@ export const OrderScalarFieldEnum = {
   shippingAddressId: 'shippingAddressId',
   billingAddressId: 'billingAddressId',
   couponId: 'couponId',
+  notes: 'notes',
   placedAt: 'placedAt'
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
+
+
+export const OrderEventScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  type: 'type',
+  message: 'message',
+  payload: 'payload',
+  actorUserId: 'actorUserId',
+  createdAt: 'createdAt'
+} as const
+
+export type OrderEventScalarFieldEnum = (typeof OrderEventScalarFieldEnum)[keyof typeof OrderEventScalarFieldEnum]
 
 
 export const OrderItemScalarFieldEnum = {

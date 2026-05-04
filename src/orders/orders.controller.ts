@@ -12,6 +12,11 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CheckoutDto } from './dto/checkout.dto';
+import {
+  AddOrderItemDto,
+  AdminCreateOrderDto,
+  UpdateOrderItemDto,
+} from './dto/admin-order.dto';
 import { OrdersService } from './orders.service';
 
 @ApiTags('orders')
@@ -36,6 +41,12 @@ export class OrdersController {
   @ApiOperation({ summary: "Current user's orders" })
   mine(@CurrentUser() user: { id: string }) {
     return this.service.findMine(user.id);
+  }
+
+  @Post('admin')
+  @ApiOperation({ summary: 'Admin create order with line items' })
+  adminCreate(@Body() body: AdminCreateOrderDto) {
+    return this.service.adminCreate(body);
   }
 
   @Get()
@@ -66,5 +77,30 @@ export class OrdersController {
   @ApiOperation({ summary: 'Delete' })
   remove(@Param('id') id: string) {
     return this.service.remove(id);
+  }
+
+  @Post(':id/items')
+  @ApiOperation({ summary: 'Admin: add a line item to an order' })
+  addItem(@Param('id') id: string, @Body() body: AddOrderItemDto) {
+    return this.service.addItem(id, body);
+  }
+
+  @Patch(':id/items/:itemId')
+  @ApiOperation({ summary: 'Admin: update a line item quantity' })
+  updateItem(
+    @Param('id') id: string,
+    @Param('itemId') itemId: string,
+    @Body() body: UpdateOrderItemDto,
+  ) {
+    return this.service.updateItem(id, itemId, body);
+  }
+
+  @Delete(':id/items/:itemId')
+  @ApiOperation({ summary: 'Admin: remove a line item from an order' })
+  removeItem(
+    @Param('id') id: string,
+    @Param('itemId') itemId: string,
+  ) {
+    return this.service.removeItem(id, itemId);
   }
 }
